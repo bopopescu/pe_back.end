@@ -20,7 +20,9 @@ app.face = Face(app)
 pass_key = "pRmgMa8T0INjEAfksaq2aafzoZXEuwKI7wDe4c1F8AY="
 cipher_suite = Fernet(pass_key)
 
-
+nutri_list=[]  #list of protein,vitamin,fat,calories,iron,calcium,carb values
+# will only store values for one dish and no whole menu.
+# its just a sample. we'll have to change it into double list or something once menu input is taken
 def success_handle(output, status=200, mimetype='application/json'):
     resp = Response(output, status=status, mimetype=mimetype)
 
@@ -201,14 +203,14 @@ def registerLogin():
 
 # route for user profile
 @app.route('/api/menu', methods=['POST'])   #change this
-def registerLogin():
+def treat_menu():
     #define variables
     #call function find_main_ingrediants() for each item in lowercase
     #call function find_nutrition_content() for each list
 
 def find_main_ingrediants(str):
     list=[]
-    name = row[1].split(" ")
+    name = str.split(" ")
     if "paneer" in name:
         list.append("paneer")
     if "veg" in name or "vegetable" in name:
@@ -254,8 +256,27 @@ def find_main_ingrediants(str):
     return list
 
 def find_nutrition_content(list):
-    nutri_list=[0,null,0,0,0]
-
+    global nutri_list
+    nutri_list=[0,[],0,0,0,0,0]
+    for i in range(0,len(list)):
+        results= app.db.select('select protein,vitamin,fat,calories,iron,calcium,carb from FoodMenu where dish_name = %s', [list[i]])
+        for row in results:
+            nutri_list[0] += row[0]
+            nutri_list[1].append(row[0])
+            nutri_list[2] += row[2]
+            nutri_list[3] += row[3]
+            nutri_list[4] += row[4]
+            nutri_list[5] += row[5]
+            nutri_list[6] += row[6]
+    nutri_list[0]/=len(i)
+    nutri_list[2] /= len(i)
+    nutri_list[3] /= len(i)
+    nutri_list[4] /= len(i)
+    nutri_list[5] /= len(i)
+    nutri_list[6] /= len(i)
+    
+def suggest_food(name):
+    
 
 @app.route('/api/users/<int:user_id>', methods=['GET', 'DELETE'])
 def user_profile(user_id):
