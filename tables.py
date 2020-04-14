@@ -17,9 +17,6 @@ conn.execute('''CREATE  TABLE IF NOT EXISTS admin_user1(
           ;''')
 
 
-
-
-
 conn.execute('''CREATE  TABLE IF NOT EXISTS users(
   `id` INT NOT NULL auto_increment ,
   `name` VARCHAR(150) NOT NULL ,
@@ -54,6 +51,18 @@ conn.execute('''CREATE  TABLE IF NOT EXISTS FoodMenu(
   `calcium` FLOAT ,
   `carb` FLOAT ,
   PRIMARY KEY (`id`) )
+           ;''')
+conn.execute('''CREATE  TABLE IF NOT EXISTS diet_info(
+  `uid` INT NOT NULL auto_increment ,
+uname` VARCHAR(30),
+  `height` smallint(6) ,
+ `weight` smallint(6) ,
+ `anaemic` smallint(6) ,
+ `iron` tinyint(1) ,
+  `diabetic`  tinyint(1) ,
+  `calcium` tinyint(1) ,
+  `vitmain` tinyint(1) ,
+  PRIMARY KEY (`uid`) )
            ;''')
 
 conn.execute('''INSERT INTO FoodMenu(dish_name,protein,vitamin,fat,calories,iron,calcium,carb) VALUES('paneer',19.1,'A',26.9,100,2.16,420.0,6.1);''' )
