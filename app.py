@@ -204,6 +204,17 @@ def registerLogin():
 # route for user profile
 @app.route('/api/menu', methods=['POST'])   #change this
 def treat_menu():
+    print(request.json)
+    print(request.json['bread'])
+    print(request.json['starter'])
+    print(request.json['dal'])
+    print(request.json['rice'])
+    print(request.json['dessert'])
+    print(request.json['gravy'])
+    print(request.json['salad'])
+    output = json.dumps({"success": True, "data": "hello"})
+    return success_handle(output)
+    #return nutrition value in output vaiable
     #define variables
     #call function find_main_ingrediants() for each item in lowercase
     #call function find_nutrition_content() for each list
