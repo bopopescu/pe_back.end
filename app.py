@@ -158,6 +158,25 @@ def train():
         print("Request is contain image")
     return success_handle(output)
 
+@app.route('/api/diet', methods=['POST'])
+def diet():
+
+    name = request.json['name']
+    height = request.json['height']
+    weight = request.json['weight']
+    anaemic = request.json['anaemia']
+    iron = request.json['iron']
+    diabetic = request.json['diabetes']
+    calcium = request.json['calcium']
+    vitamin = request.json['vitamin']
+
+    user_id = app.db.insert('INSERT INTO diet_info(uname, height, weight, anaemic, iron, diabetic, calcium, vitmain) '
+                            'values(%s, %s, %s, %s, %s, %s, %s, %s)',
+                            [name, height, weight, anaemic, iron, diabetic, calcium, vitamin])
+
+    output = json.dumps({"success": True, "data": user_id})
+    return success_handle(output)
+
 
 
 @app.route('/api/login', methods=['POST'])
