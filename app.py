@@ -164,11 +164,11 @@ def diet():
     name = request.json['name']
     height = request.json['height']
     weight = request.json['weight']
-    anaemic = request.json['anaemia']
-    iron = request.json['iron']
-    diabetic = request.json['diabetes']
-    calcium = request.json['calcium']
-    vitamin = request.json['vitamin']
+    anaemic = request.json['anaemia'] # 0-No, 1- Yes
+    iron = request.json['iron'] # 0-No, 1- Yes
+    diabetic = request.json['diabetes'] # 0-No, 1- Yes
+    calcium = request.json['calcium'] # 0-No, 1- Yes
+    vitamin = request.json['vitamin'] # 0-None, 1-A, 2-B, 3-C, 4-D, 5-E
 
     user_id = app.db.insert('INSERT INTO diet_info(uname, height, weight, anaemic, iron, diabetic, calcium, vitmain) '
                             'values(%s, %s, %s, %s, %s, %s, %s, %s)',
