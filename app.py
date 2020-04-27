@@ -20,9 +20,16 @@ app.face = Face(app)
 pass_key = "pRmgMa8T0INjEAfksaq2aafzoZXEuwKI7wDe4c1F8AY="
 cipher_suite = Fernet(pass_key)
 
-nutri_list=[]  #list of protein,vitamin,fat,calories,iron,calcium,carb values
-# will only store values for one dish and no whole menu.
-# its just a sample. we'll have to change it into double list or something once menu input is taken
+
+Record = collections.namedtuple('Record', ['name','protein','vitamin','fat','calories','iron','calcium','carb'])
+#Student.student_array.append(Record(len(Student.student_array), name, course_name, mark1, mark2, mark3))
+bread_nutri_list=[] #list of protein,vitamin,fat,calories,iron,calcium,carb values
+gravy_nutri_list=[]
+starters_nutri_list=[]
+rice_nutri_list=[]
+salads_nutri_list=[]
+desserts_nutri_list=[]
+dal_nutri_list=[]
 def success_handle(output, status=200, mimetype='application/json'):
     resp = Response(output, status=status, mimetype=mimetype)
 
@@ -158,25 +165,6 @@ def train():
         print("Request is contain image")
     return success_handle(output)
 
-@app.route('/api/diet', methods=['POST'])
-def diet():
-
-    name = request.json['name']
-    height = request.json['height']
-    weight = request.json['weight']
-    anaemic = request.json['anaemia'] # 0-No, 1- Yes
-    iron = request.json['iron'] # 0-No, 1- Yes
-    diabetic = request.json['diabetes'] # 0-No, 1- Yes
-    calcium = request.json['calcium'] # 0-No, 1- Yes
-    vitamin = request.json['vitamin'] # 0-None, 1-A, 2-B, 3-C, 4-D, 5-E
-
-    user_id = app.db.insert('INSERT INTO diet_info(uname, height, weight, anaemic, iron, diabetic, calcium, vitmain) '
-                            'values(%s, %s, %s, %s, %s, %s, %s, %s)',
-                            [name, height, weight, anaemic, iron, diabetic, calcium, vitamin])
-
-    output = json.dumps({"success": True, "data": user_id})
-    return success_handle(output)
-
 
 
 @app.route('/api/login', methods=['POST'])
@@ -223,90 +211,257 @@ def registerLogin():
 # route for user profile
 @app.route('/api/menu', methods=['POST'])   #change this
 def treat_menu():
-    print(request.json)
-    print(request.json['bread'])
-    print(request.json['starter'])
-    print(request.json['dal'])
-    print(request.json['rice'])
-    print(request.json['dessert'])
-    print(request.json['gravy'])
-    print(request.json['salad'])
+    global bread_nutri_list
+    global gravy_nutri_list
+    global starters_nutri_list
+    global salads_nutri_list
+    global rice_nutri_list
+    global desserts_nutri_list
+    global dal_nutri_list
+    bread=request.json['bread']
+    starter=request.json['starter']
+    dal=request.json['dal']
+    rice=request.json['rice']
+    dessert=request.json['dessert']
+    gravy=request.json['gravy']
+    salad=request.json['salad']
+    bread_nutri_list=find_main_ingrediants(bread)
+    starters_nutri_list=find_main_ingrediants(starter)
+    dal_nutri_list=find_main_ingrediants(dal)
+    rice_nutri_list=find_main_ingrediants(rice)
+    desserts_nutri_list=find_main_ingrediants(dessert)
+    gravy_nutri_list=find_main_ingrediants(gravy)
+    salads_nutri_list=find_main_ingrediants(salad)
     output = json.dumps({"success": True, "data": "hello"})
     return success_handle(output)
-    #return nutrition value in output vaiable
     #define variables
     #call function find_main_ingrediants() for each item in lowercase
     #call function find_nutrition_content() for each list
 
-def find_main_ingrediants(str):
-    list=[]
-    name = str.split(" ")
-    if "paneer" in name:
-        list.append("paneer")
-    if "veg" in name or "vegetable" in name:
-        list.append("mixveg")
-    if "egg" in name:
-        list.append("egg")
-    if "potato" in name or "aloo" in name:
-        list.append("potato")
-    if "bhindi" in name or "ladyfinger" in name:
-        list.append("bhindi")
-    if "fruit" in name or "fruits" in name:
-        list.append("fruits")
-    if "veg" in name or "vegetable" in name:
-        list.append("greenvegetables")
-    if "cucumber" in name or "khira" in name:
-        list.append("cucumber")
-    if "sprouts" in name or "pulse" in name or "chickpea" in name:
-        list.append("sprouts")
-    if "palak" in name or "spinach" in name:
-        list.append("spinach")
-    if "methi" in name or "fenugreek" in name:
-        list.append("methi")
-    if "curd" in name or "dahi" in name:
-        list.append("curd")
-    if "bread" in name or "pao" in name:
-        list.append("bread")
-    if "chapathi" in name or "chapati" in name or "roti" in name or "paratha" in name:
-        list.append("chapati")
-    if "chana" in name and "dal" in name:
-        list.append("chana")
-    if "udad" in name and "dal" in name:
-        list.append("udad")
-    if "moong" in name and "dal" in name:
-        list.append("moong")
-    if "dal" in name and "moong" not in name and "masoor" not in name:
-        list.append("tuar")
-    if "masoor" in name and "dal" in name:
-        list.append("masoor")
-    if "cauliflower" in name or ("gobhi" in name and "patta" not in name):
-        list.append("cauliflower")
-    if "cabbage" in name or ("gobhi" in name and "patta" in name):
-        list.append("cabbage")
-    return list
+def find_main_ingrediants(items):
+    nutrilist=[]
+    for str in items:
+        list = []
+        temp=str
+	temp.lower()
+        name = temp.split(" ")
+        if "paneer" in name:
+            list.append("paneer")
+        if "veg" in name or "vegetable" in name:
+            list.append("mixveg")
+        if "egg" in name:
+            list.append("egg")
+        if "potato" in name or "aloo" in name:
+            list.append("potato")
+        if "bhindi" in name or "ladyfinger" in name:
+            list.append("bhindi")
+        if "fruit" in name or "fruits" in name:
+            list.append("fruits")
+        if "veg" in name or "vegetable" in name:
+            list.append("greenvegetables")
+        if "cucumber" in name or "khira" in name:
+            list.append("cucumber")
+        if "sprouts" in name or "pulse" in name or "chickpea" in name:
+            list.append("sprouts")
+        if "palak" in name or "spinach" in name:
+            list.append("spinach")
+        if "methi" in name or "fenugreek" in name:
+            list.append("methi")
+        if "curd" in name or "dahi" in name:
+            list.append("curd")
+        if "bread" in name or "pao" in name:
+            list.append("bread")
+        if "chapathi" in name or "chapati" in name or "roti" in name or "paratha" in name:
+            list.append("chapati")
+        if "chana" in name and "dal" in name:
+            list.append("chana")
+        if "udad" in name and "dal" in name:
+            list.append("udad")
+        if "moong" in name and "dal" in name:
+            list.append("moong")
+        if "dal" in name and "moong" not in name and "masoor" not in name:
+            list.append("tuar")
+        if "masoor" in name and "dal" in name:
+            list.append("masoor")
+        if "cauliflower" in name or ("gobhi" in name and "patta" not in name):
+            list.append("cauliflower")
+        if "cabbage" in name or ("gobhi" in name and "patta" in name):
+            list.append("cabbage")
+        nutrilist=find_nutrition_content(list,str,nutrilist)
+    return nutrilist
 
-def find_nutrition_content(list):
-    global nutri_list
-    nutri_list=[0,[],0,0,0,0,0]
-    for i in range(0,len(list)):
-        results= app.db.select('select protein,vitamin,fat,calories,iron,calcium,carb from FoodMenu where dish_name = %s', [list[i]])
-        for row in results:
-            nutri_list[0] += row[0]
-            nutri_list[1].append(row[0])
-            nutri_list[2] += row[2]
-            nutri_list[3] += row[3]
-            nutri_list[4] += row[4]
-            nutri_list[5] += row[5]
-            nutri_list[6] += row[6]
-    nutri_list[0]/=len(i)
-    nutri_list[2] /= len(i)
-    nutri_list[3] /= len(i)
-    nutri_list[4] /= len(i)
-    nutri_list[5] /= len(i)
-    nutri_list[6] /= len(i)
-    
-def suggest_food(name):
-    
+@app.route('/api/diet', methods=['POST'])
+def diet():
+
+    name = request.json['name']
+    height = request.json['height']
+    weight = request.json['weight']
+    anaemic = request.json['anaemia']
+    iron = request.json['iron']
+    diabetic = request.json['diabetes']
+    calcium = request.json['calcium']
+    vitamin = request.json['vitamin']
+
+    user_id = app.db.insert('INSERT INTO diet_info(uname, height, weight, anaemic, iron, diabetic, calcium, vitmain) '
+                            'values(%s, %s, %s, %s, %s, %s, %s, %s)',
+                            [name, height, weight, anaemic, iron, diabetic, calcium, vitamin])
+
+    output = json.dumps({"success": True, "data": user_id})
+    return success_handle(output)
+
+
+def find_nutrition_content(list,name,nutri_list):
+    new_entry=['',0,[],0,0,0,0,0]
+    new_entry[0]=name
+    for i in list:
+        results= app.db.select('select protein,vitamin,fat,calories,iron,calcium,carb from FoodMenu where dish_name = %s', [i])
+        row=results[0]
+        new_entry[1] += row[0]
+        new_entry[2].append(row[1])
+        new_entry[3] += row[2]
+        new_entry[4] += row[3]
+        new_entry[5] += row[4]
+        new_entry[6] += row[5]
+        new_entry[7] += row[6]
+    new_entry[1]/=len(list)
+    new_entry[3] /= len(list)
+    new_entry[4] /= len(list)
+    new_entry[5] /= len(list)
+    new_entry[6] /= len(list)
+    new_entry[7] /= len(list)
+    new_entry= [str(item) for item in new_entry]
+    nutri_list.append(new_entry)
+    return nutri_list
+def suggest_food(user_id):
+    global bread_nutri_list
+    global gravy_nutri_list
+    global starters_nutri_list
+    global salads_nutri_list
+    global rice_nutri_list
+    global desserts_nutri_list
+    global dal_nutri_list
+    results = app.db.select('select height,weight,iron,diabetic,calcium,vitamin from diet_info where uid = %s', (user_id,))
+    row=results[0]
+    bmi = (row[1]*10000) / (row[0] * row[0])
+    priority = []
+    if bmi <= 18.5:
+        if slot()=="breakfast" or slot()=="hi-tea":
+            cal_count=300
+        else:
+            cal_count= 900
+        priority.append(6)
+    elif bmi > 18.5 and bmi < 25:
+        if slot()=="breakfast" or slot()=="hi-tea":
+            cal_count=300
+        else:
+            cal_count= 800
+    elif bmi > 25 and bmi < 30:
+        if slot() == "breakfast" or slot() == "hi-tea":
+            cal_count = 200
+        else:
+            cal_count = 600
+    elif bmi > 30:
+        priority.append(1)
+        if slot() == "breakfast" or slot() == "hi-tea":
+            cal_count = 200
+        else:
+            cal_count = 600
+    for i in range(2, 5):
+        if (row[i] == 1):
+            priority.append(i)
+    priority.append(row[5])
+    food=[]
+    print("printing food")
+    print(food)
+    quantity=0
+    while(cal_count>0):
+        val=bestfit(priority,bread_nutri_list)
+        if (val!=[]):
+            if cal_count - 2*float(val[4]) < 0:
+                break
+            cal_count-=2*float(val[4])
+            food.append(val[0])
+            quantity+=2
+        val=bestfit(priority,gravy_nutri_list)
+        if(val!=[]):
+            if cal_count-float(val[4])<0:
+                break
+            cal_count -= float(val[4])
+            food.append(val[0])
+        val = bestfit(priority,dal_nutri_list)
+        if (val != []):
+            if cal_count - float(val[4]) < 0:
+                break
+            cal_count -= float(val[4])
+            food.append(val[0])
+        val = bestfit(priority,salads_nutri_list)
+        if (val != []):
+            if cal_count - float(val[4]) < 0:
+                break
+            cal_count -= float(val[4])
+            food.append(val[0])
+        val = bestfit(priority,rice_nutri_list)
+        if (val != []):
+            if cal_count - float(val[4]) < 0:
+                break
+            cal_count -= float(val[4])
+            food.append(val[0])
+        val = bestfit(priority,starters_nutri_list)
+        if (val != []):
+            if cal_count - float(val[4]) < 0:
+                break
+            cal_count -= float(val[4])
+            food.append(val[0])
+        val = bestfit(priority,desserts_nutri_list)
+        if (val != []):
+            if cal_count - float(val[4]) < 0:
+                break
+            cal_count -= float(val[4])
+            food.append(val[0])
+    val = bestfit(priority,bread_nutri_list)
+    while(val!=[] and cal_count - float(val[4]) >= 0):
+        cal_count -= float(val[4])
+        quantity+=1
+    food[0]=str(quantity)+" "+food[0]+"s"
+    return food
+
+def bestfit(priority,nutri_list):
+    if len(nutri_list)==0:
+        return []
+    Map = {'1': 4, '2': 5, '3': 7, '4': 6, '5': 2, '6': 1}
+    vit=priority[len(priority)-1]
+    del priority[-1]
+    for i in priority:
+        if(len(nutri_list)==1):
+            return nutri_list[0]
+        if(i!=3 and i!=1):
+            min=nutri_list[0]
+            minpos=0
+            pos=0
+            for records in nutri_list:
+                val=Map[str(i)]
+                if float(records[val]) < float(min[val]):
+                    min=records
+                    minpos=pos
+                pos+=1
+            del nutri_list[minpos]
+        else:
+            max = nutri_list[0]
+            maxpos = 0
+            pos = 0
+            for records in nutri_list:
+                if float(records[Map[str(i)]]) < float(max[Map[str(i)]]):
+                    max = records
+                    maxpos = pos
+                pos += 1
+            del nutri_list[maxpos]
+    if(len(nutri_list)>1):
+        for records in nutri_list:
+            if vit in list(records[Map[str(i)]]):
+                return records
+    else:
+        return nutri_list[0]
+
 
 @app.route('/api/users/<int:user_id>', methods=['GET', 'DELETE'])
 def user_profile(user_id):
@@ -423,7 +578,6 @@ def recognize():
                     "SELECT id, std_name, std_id, type, created FROM attendance1 WHERE std_id = %s and created = %s and type = %s",
                     [user_id, str(d1), slot()])
                 print(results)
-
                 message = {"message": "Hey we found {0} matched with your face image".format(user["name"]),
                            "user": user}
                 return success_handle(json.dumps({"id": user_id, "name": user["name"], "slot": nowSlot}))
