@@ -240,54 +240,26 @@ def treat_menu():
 
 def find_main_ingrediants(items):
     nutrilist=[]
+    df = pd.read_csv('ingrediants.csv', delimiter=',')
+    unique_prodNames = pd.unique(df["keywords"])
+    print(unique_prodNames)
+    results = app.db.select('select dish_name from FoodMenu')
+    results = [i[0] for i in results]
+    print(results)
     for str in items:
         list = []
-        temp=str
-	temp.lower()
-        name = temp.split(" ")
-        if "paneer" in name:
-            list.append("paneer")
-        if "veg" in name or "vegetable" in name:
-            list.append("mixveg")
-        if "egg" in name:
-            list.append("egg")
-        if "potato" in name or "aloo" in name:
-            list.append("potato")
-        if "bhindi" in name or "ladyfinger" in name:
-            list.append("bhindi")
-        if "fruit" in name or "fruits" in name:
-            list.append("fruits")
-        if "veg" in name or "vegetable" in name:
-            list.append("greenvegetables")
-        if "cucumber" in name or "khira" in name:
-            list.append("cucumber")
-        if "sprouts" in name or "pulse" in name or "chickpea" in name:
-            list.append("sprouts")
-        if "palak" in name or "spinach" in name:
-            list.append("spinach")
-        if "methi" in name or "fenugreek" in name:
-            list.append("methi")
-        if "curd" in name or "dahi" in name:
-            list.append("curd")
-        if "bread" in name or "pao" in name:
-            list.append("bread")
-        if "chapathi" in name or "chapati" in name or "roti" in name or "paratha" in name:
-            list.append("chapati")
-        if "chana" in name and "dal" in name:
-            list.append("chana")
-        if "udad" in name and "dal" in name:
-            list.append("udad")
-        if "moong" in name and "dal" in name:
-            list.append("moong")
-        if "dal" in name and "moong" not in name and "masoor" not in name:
-            list.append("tuar")
-        if "masoor" in name and "dal" in name:
-            list.append("masoor")
-        if "cauliflower" in name or ("gobhi" in name and "patta" not in name):
-            list.append("cauliflower")
-        if "cabbage" in name or ("gobhi" in name and "patta" in name):
-            list.append("cabbage")
-        nutrilist=find_nutrition_content(list,str,nutrilist)
+        name = str.split(" ")
+        print(str)
+        print(name)
+        for i in name:
+            if i in unique_prodNames:
+                val = df[df.keywords == i].iloc[0][1]
+                list.append(val)
+            elif i in results:
+                list.append(i)
+        if(len(list)!=0):
+            nutrilist=find_nutrition_content(list,str,nutrilist)
+    print(nutrilist)
     return nutrilist
 
 @app.route('/api/diet', methods=['POST'])
@@ -316,19 +288,15 @@ def find_nutrition_content(list,name,nutri_list):
     for i in list:
         results= app.db.select('select protein,vitamin,fat,calories,iron,calcium,carb from FoodMenu where dish_name = %s', [i])
         row=results[0]
-        new_entry[1] += row[0]
+        for j in range(1,8):
+            if(j==2):
+                continue;
+            new_entry[j] += row[j-1]
         new_entry[2].append(row[1])
-        new_entry[3] += row[2]
-        new_entry[4] += row[3]
-        new_entry[5] += row[4]
-        new_entry[6] += row[5]
-        new_entry[7] += row[6]
-    new_entry[1]/=len(list)
-    new_entry[3] /= len(list)
-    new_entry[4] /= len(list)
-    new_entry[5] /= len(list)
-    new_entry[6] /= len(list)
-    new_entry[7] /= len(list)
+    for j in range(1,8):
+        if (j == 2):
+            continue
+        new_entry[j]/= len(list)
     new_entry= [str(item) for item in new_entry]
     nutri_list.append(new_entry)
     return nutri_list
@@ -429,16 +397,19 @@ def bestfit(priority,nutri_list):
     if len(nutri_list)==0:
         return []
     Map = {'1': 4, '2': 5, '3': 7, '4': 6, '5': 2, '6': 1}
+    print("priority=",priority)
     vit=priority[len(priority)-1]
     del priority[-1]
     for i in priority:
         if(len(nutri_list)==1):
-            return nutri_list[0]
+            break
         if(i!=3 and i!=1):
             min=nutri_list[0]
             minpos=0
             pos=0
             for records in nutri_list:
+                temp=records
+                print(temp[1])
                 val=Map[str(i)]
                 if float(records[val]) < float(min[val]):
                     min=records
@@ -455,13 +426,13 @@ def bestfit(priority,nutri_list):
                     maxpos = pos
                 pos += 1
             del nutri_list[maxpos]
+    priority.append(vit)
     if(len(nutri_list)>1):
         for records in nutri_list:
             if vit in list(records[Map[str(i)]]):
                 return records
     else:
         return nutri_list[0]
-
 
 @app.route('/api/users/<int:user_id>', methods=['GET', 'DELETE'])
 def user_profile(user_id):
